@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/livin21/billmate/internal/store"
+	"github.com/livin21/billmate/internal/util"
 )
 
 func (app *application) listUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,5 +29,8 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		app.serverError(w, err)
 		return
 	}
-	app.writeJson(w, http.StatusCreated, user)
+	app.writeJson(w, http.StatusCreated, &util.MessageResponse{
+		Message: "User created successfully",
+		Status: http.StatusCreated,
+	})
 }

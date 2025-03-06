@@ -15,11 +15,13 @@ type application struct {
 	store  store.Storage
 	writeJson func(w http.ResponseWriter, status int, v interface{})
 	serverError func(w http.ResponseWriter, err error)
+	unAuthorized func(w http.ResponseWriter)
 }
 
 type config struct {
 	addr string
 	db   dbConfig
+	jwtSecret string
 }
 
 type dbConfig struct {
@@ -50,6 +52,12 @@ func (app *application) mount() http.Handler {
 			r.Post("/", app.createExpenseHandler)
 		})
 	})
+
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/login", app.loginHandler)
+		r.Post("/signup", app.signupHandler)
+	})
+
 	return r
 }
 

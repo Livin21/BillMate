@@ -12,7 +12,7 @@ import (
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Name  string    `json:"name"`
-	Password  string    `json:"_"`
+	Password  string    `json:"password"`
 	Phone     string    `json:"phone"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
@@ -30,7 +30,7 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 	if err != nil {
 		return err
 	}
-	queryErr := s.db.QueryRowContext(ctx, query, id, user.Name, password, user.Phone, user.Email).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
+	queryErr := s.db.QueryRowContext(ctx, query, id, user.Name, string(password), user.Phone, user.Email).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 	if queryErr != nil {
 		return queryErr
 	}
@@ -60,4 +60,24 @@ func (s *UserStore) List(ctx context.Context) ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `SELECT id, name, phone, email, password, created_at, updated_at FROM users WHERE email = $1`
+	var user User
+	err := s.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Name, &user.Phone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (s *UserStore) GetByID(ctx context.Context, id string) (*User, error) {
+	query := `SELECT id, name, phone, email, created_at, updated_at FROM users WHERE id = $1`
+	var user User
+	err := s.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Name, &user.Phone, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -6,7 +6,7 @@ CREATE TABLE
     users (
         id UUID PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        password bytea NOT NULL,
+        password VARCHAR(255) NOT NULL,
         phone VARCHAR(15),
         email CITEXT UNIQUE NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW (),
