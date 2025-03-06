@@ -11,16 +11,16 @@ import (
 )
 
 type application struct {
-	config config
-	store  store.Storage
-	writeJson func(w http.ResponseWriter, status int, v interface{})
-	serverError func(w http.ResponseWriter, err error)
+	config       config
+	store        store.Storage
+	writeJson    func(w http.ResponseWriter, status int, v interface{})
+	serverError  func(w http.ResponseWriter, err error)
 	unAuthorized func(w http.ResponseWriter)
 }
 
 type config struct {
-	addr string
-	db   dbConfig
+	addr      string
+	db        dbConfig
 	jwtSecret string
 }
 
@@ -43,13 +43,16 @@ func (app *application) mount() http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
-		r.Route("/users", func(r chi.Router) {
-			r.Get("/", app.listUsersHandler)
-			r.Post("/", app.createUserHandler)
-		})
-		r.Route("/expenses", func(r chi.Router) {
-			r.Get("/", app.listExpensesHandler)
-			r.Post("/", app.createExpenseHandler)
+		r.Group(func(r chi.Router) {
+			r.Use(app.authMiddleware)
+			r.Route("/users", func(r chi.Router) {
+				r.Get("/", app.listUsersHandler)
+				r.Post("/", app.createUserHandler)
+			})
+			r.Route("/expenses", func(r chi.Router) {
+				r.Get("/", app.listExpensesHandler)
+				r.Post("/", app.createExpenseHandler)
+			})
 		})
 	})
 

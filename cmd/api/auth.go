@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -72,5 +73,37 @@ func (app *application) signupHandler(w http.ResponseWriter, r *http.Request) {
 	app.writeJson(w, http.StatusCreated, &util.MessageResponse{
 		Message: "User created successfully",
 		Status: http.StatusCreated,
+	})
+}
+
+func (app *application) authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			app.unAuthorized(w)
+			return
+		}
+
+		tokenString := authHeader[len("Bearer "):]
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, &jwt.ValidationError{}
+			}
+			return []byte(app.config.jwtSecret), nil
+		})
+		if err != nil {
+			app.unAuthorized(w)
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			app.unAuthorized(w)
+			return
+		}
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "user_id", claims["user_id"])
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
