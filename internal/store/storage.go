@@ -3,12 +3,15 @@ package store
 import (
 	"context"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type Storage struct {
 	Expenses interface {
 		Create(context.Context, *Expense) error
 		List(context.Context) ([]Expense, error)
+		ListByUser(context.Context, uuid.UUID) ([]Expense, error)
 	}
 	Users interface {
 		Create(context.Context, *User) error

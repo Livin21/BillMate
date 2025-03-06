@@ -18,6 +18,12 @@ func (app *application) createExpenseHandler(w http.ResponseWriter, r *http.Requ
 		app.badRequest(w, "title and amount are required")
 		return
 	}
+	parsedUserId, parseErr:= getUserIdFromContext(r.Context())
+	if parseErr != nil {
+		app.serverError(w, parseErr)
+		return
+	}
+	expense.UserId = parsedUserId
 	err = app.store.Expenses.Create(r.Context(), &expense)
 	if err != nil {
 		app.serverError(w, err)
@@ -27,7 +33,18 @@ func (app *application) createExpenseHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (app *application) listExpensesHandler(w http.ResponseWriter, r *http.Request) {
-	expenses, err := app.store.Expenses.List(r.Context())
+	var expenses []store.Expense
+	var err error
+	if r.Context().Value("role") == "admin" {
+		expenses, err = app.store.Expenses.List(r.Context())
+	} else {
+		parsedUserId, parseErr:= getUserIdFromContext(r.Context())
+		if parseErr != nil {
+			app.serverError(w, parseErr)
+			return
+		}
+		expenses, err = app.store.Expenses.ListByUser(r.Context(), parsedUserId)
+	}
 	if err != nil {
 		app.serverError(w, err)
 		return

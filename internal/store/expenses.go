@@ -55,3 +55,28 @@ func (s *ExpenseStore) List(ctx context.Context) ([]Expense, error) {
 
 	return expenses, nil
 }
+
+func (s *ExpenseStore) ListByUser(ctx context.Context, userId uuid.UUID) ([]Expense, error) {
+	query := `SELECT id, title, amount, user_id, description, created_at, updated_at FROM expenses WHERE user_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	expenses := []Expense{}
+	for rows.Next() {
+		var expense Expense
+		err := rows.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.UserId, &expense.Description, &expense.CreatedAt, &expense.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		expenses = append(expenses, expense)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
+}

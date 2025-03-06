@@ -9,6 +9,10 @@ import (
 )
 
 func (app *application) listUsersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Value("role") != "admin" {
+		app.unAuthorized(w)
+		return
+	}
 	users, err := app.store.Users.List(r.Context())
 	if err != nil {
 		app.serverError(w, err)
@@ -18,6 +22,10 @@ func (app *application) listUsersHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Context().Value("role") != "admin" {
+		app.unAuthorized(w)
+		return
+	}
 	var user store.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -27,6 +35,12 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	if user.Email == "" || user.Password == "" {
 		app.badRequest(w, "email and password are required")
 		return
+	}
+	if user.Role != "" {
+		if user.Role != "admin" && user.Role != "user" {
+			app.badRequest(w, "role can only be admin or user")
+			return
+		}
 	}
 	err = app.store.Users.Create(r.Context(), &user)
 	if err != nil {

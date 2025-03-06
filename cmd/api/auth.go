@@ -8,10 +8,19 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/livin21/billmate/internal/store"
 	"github.com/livin21/billmate/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
+
+func getUserIdFromContext(ctx context.Context) (uuid.UUID, error) {
+	parsedUserId, parseErr:= uuid.Parse(ctx.Value("user_id").(string))
+	if parseErr != nil {
+		return uuid.UUID{}, parseErr
+	}
+	return parsedUserId, nil
+}
 
 func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var user store.User
@@ -40,6 +49,7 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		"user_id": u.ID,
 		"name":    u.Name,
 		"iat":     time.Now().Unix(),
+		"role":    u.Role,
 	})
 
 	signedToken, err := token.SignedString([]byte(app.config.jwtSecret))
@@ -98,6 +108,7 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 				"user_id": "",
 				"name":    "",
 				"iat":     time.Time{},
+				"role":    "",
 			},
 			func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -118,6 +129,7 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "user_id", claims["user_id"])
+		ctx = context.WithValue(ctx, "role", claims["role"])
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

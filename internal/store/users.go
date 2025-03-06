@@ -13,6 +13,7 @@ type User struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	Password  string    `json:"password"`
+	Role      string    `json:"role"`
 	Phone     string    `json:"phone"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
@@ -24,7 +25,7 @@ type UserStore struct {
 }
 
 func (s *UserStore) Create(ctx context.Context, user *User) error {
-	query := `INSERT INTO users (id, name, password, phone, email) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at`
+	query := `INSERT INTO users (id, name, password, role, phone, email) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at, updated_at`
 	id := uuid.New()
 	password, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -38,7 +39,7 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 }
 
 func (s *UserStore) List(ctx context.Context) ([]User, error) {
-	query := `SELECT id, name, phone, email, created_at, updated_at FROM users`
+	query := `SELECT id, name, phone, role, email, created_at, updated_at FROM users`
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func (s *UserStore) List(ctx context.Context) ([]User, error) {
 	users := []User{}
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.ID, &user.Name, &user.Phone, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Name, &user.Phone, &user.Role, &user.Email, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -63,9 +64,9 @@ func (s *UserStore) List(ctx context.Context) ([]User, error) {
 }
 
 func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
-	query := `SELECT id, name, phone, email, password, created_at, updated_at FROM users WHERE email = $1`
+	query := `SELECT id, name, phone, email, role, password, created_at, updated_at FROM users WHERE email = $1`
 	var user User
-	err := s.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Name, &user.Phone, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := s.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Name, &user.Phone, &user.Email, &user.Role, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
