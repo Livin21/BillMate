@@ -1,0 +1,19 @@
+meta {
+  name: Create an expense
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/v1/expenses/
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Food",
+    "amount": 540.23,
+    "user_id": "7de1b267-4bec-4648-be77-a458042c670f"
+  }
+}

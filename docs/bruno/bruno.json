@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "BillMate",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
