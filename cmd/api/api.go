@@ -16,6 +16,7 @@ type application struct {
 	writeJson    func(w http.ResponseWriter, status int, v interface{})
 	serverError  func(w http.ResponseWriter, err error)
 	unAuthorized func(w http.ResponseWriter)
+	badRequest   func(w http.ResponseWriter, err string)
 }
 
 type config struct {

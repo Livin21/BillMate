@@ -24,6 +24,10 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		app.serverError(w, err)
 		return
 	}
+	if user.Email == "" || user.Password == "" {
+		app.badRequest(w, "email and password are required")
+		return
+	}
 	err = app.store.Users.Create(r.Context(), &user)
 	if err != nil {
 		app.serverError(w, err)

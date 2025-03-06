@@ -33,13 +33,13 @@ func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 		app.unAuthorized(w)
 		return
 	}
-	
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": u.Email,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"email":   u.Email,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 		"user_id": u.ID,
-		"name": u.Name,
-		"iat": time.Now().Unix(),
+		"name":    u.Name,
+		"iat":     time.Now().Unix(),
 	})
 
 	signedToken, err := token.SignedString([]byte(app.config.jwtSecret))
@@ -64,6 +64,11 @@ func (app *application) signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Email == "" || user.Password == "" {
+		app.badRequest(w, "email and password are required")
+		return
+	}
+
 	err = app.store.Users.Create(r.Context(), &user)
 	if err != nil {
 		app.serverError(w, err)
@@ -72,7 +77,7 @@ func (app *application) signupHandler(w http.ResponseWriter, r *http.Request) {
 
 	app.writeJson(w, http.StatusCreated, &util.MessageResponse{
 		Message: "User created successfully",
-		Status: http.StatusCreated,
+		Status:  http.StatusCreated,
 	})
 }
 
@@ -85,12 +90,21 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 		}
 
 		tokenString := authHeader[len("Bearer "):]
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, &jwt.ValidationError{}
-			}
-			return []byte(app.config.jwtSecret), nil
-		})
+		token, err := jwt.ParseWithClaims(
+			tokenString,
+			jwt.MapClaims{
+				"email":   "",
+				"exp":     time.Time{},
+				"user_id": "",
+				"name":    "",
+				"iat":     time.Time{},
+			},
+			func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, &jwt.ValidationError{}
+				}
+				return []byte(app.config.jwtSecret), nil
+			})
 		if err != nil {
 			app.unAuthorized(w)
 			return

@@ -14,6 +14,10 @@ func (app *application) createExpenseHandler(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, err)
 		return
 	}
+	if expense.Title == "" || expense.Amount == 0 {
+		app.badRequest(w, "title and amount are required")
+		return
+	}
 	err = app.store.Expenses.Create(r.Context(), &expense)
 	if err != nil {
 		app.serverError(w, err)

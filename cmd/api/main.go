@@ -59,6 +59,13 @@ func main() {
 				"error": "unauthorized",
 			})
 		},
+		badRequest: func(w http.ResponseWriter, err string) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error": err,
+			})
+		},
 	}
 
 	mux := app.mount()
