@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/v1/users/
+  url: {{host}}/v1/users/
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 body:json {

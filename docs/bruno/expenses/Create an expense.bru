@@ -5,14 +5,18 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/v1/expenses/
+  url: {{host}}/v1/expenses/
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 body:json {
   {
-    "title": "Food",
+    "title": "Food12",
     "amount": 540.23,
     "user_id": "c1aaec58-bf92-4f2b-a6b4-b91a6716a591"
   }

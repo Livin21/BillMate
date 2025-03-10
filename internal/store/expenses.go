@@ -14,6 +14,9 @@ type Expense struct {
 	Amount      float64   `json:"amount"`
 	Description string    `json:"description"`
 	UserId      uuid.UUID `json:"user_id"`
+	PaidBy      uuid.UUID    `json:"paid_by"`
+	PaidAt      time.Time `json:"paid_at"`
+	PaidByName  string    `json:"paid_by_name"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }

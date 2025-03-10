@@ -5,11 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:8080/v1/users/
+  url: {{host}}/v1/users/
   body: none
   auth: bearer
 }
 
 auth:bearer {
-  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImxpdmluMjAyMUBnbWFpbC5jb20iLCJleHAiOjE3NDEzNzk3MjksImlhdCI6MTc0MTI5MzMyOSwibmFtZSI6IiIsInVzZXJfaWQiOiIxMWRhMGQ5My0zZTgwLTRhYjUtYjhmZS00YjFjN2Q3NDk0YzQifQ.wNWV_f7l9tbvB39dpuX1r9vU9MH23M1tm5p6jKzrVmQ
+  token: {{token}}
 }

@@ -24,6 +24,10 @@ func (app *application) createExpenseHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	expense.UserId = parsedUserId
+	if expense.PaidBy.String() == "" && expense.PaidByName == "" {
+		expense.PaidBy = parsedUserId
+		expense.PaidByName = getUserNameFromContext(r.Context())
+	}
 	err = app.store.Expenses.Create(r.Context(), &expense)
 	if err != nil {
 		app.serverError(w, err)

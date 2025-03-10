@@ -5,14 +5,18 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/auth/login
+  url: {{host}}/auth/login
   body: json
   auth: none
 }
 
 body:json {
   {
-    "email": "livin2021@gmail.com",
-    "password": "hello@1234"
+    "email": "livinmathew99@gmail.com",
+    "password": "hello@123"
   }
+}
+
+script:post-response {
+  bru.setEnvVar("token", res.body.data.token);
 }

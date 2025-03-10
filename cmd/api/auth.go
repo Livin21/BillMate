@@ -22,6 +22,10 @@ func getUserIdFromContext(ctx context.Context) (uuid.UUID, error) {
 	return parsedUserId, nil
 }
 
+func getUserNameFromContext(ctx context.Context) string {
+	return ctx.Value("name").(string)
+}
+
 func (app *application) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var user store.User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -130,6 +134,8 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "user_id", claims["user_id"])
 		ctx = context.WithValue(ctx, "role", claims["role"])
+		ctx = context.WithValue(ctx, "name", claims["name"])
+		ctx = context.WithValue(ctx, "email", claims["email"])
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
